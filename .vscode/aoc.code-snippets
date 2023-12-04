@@ -1,0 +1,12 @@
+{
+  "aoc": {
+    "prefix": "aoc",
+    "body": [
+        "def d${1:day}_${2:part}(input):",
+        "\tans = 0",
+        "\t${0:for line in input:\n\t\t}",
+        "\tprint(ans)",
+        ""],
+    "description": "aoc function."
+  }
+}
