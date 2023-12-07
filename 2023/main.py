@@ -10,34 +10,20 @@ def d7_2(input):
     hand_list = [[] for _ in range(7)]
 
     SORT_ORDER = {"2": 0, "3": 1, "4": 2, "5": 3, "6": 4, "7": 5, "8": 6, "9": 7, "T": 8, "J": -1, "Q": 10, "K": 11, "A": 12}
+    rank_map = {"5": 6, "41": 5, "32": 4, "311": 3, "221": 2, "2111": 1, "11111": 0}
 
     for line in input:
         card, bid = line.split(" ")
+        
         sorted_card = "".join(sorted(card, key=lambda x: SORT_ORDER[x], reverse=True))
-        count = Counter(sorted_card)
-        most_common = count.most_common(5)
+        most_common = Counter(sorted_card).most_common(5)
         non_j_most_common = most_common[0][0] if (most_common[0][0] != "J" or len(most_common) == 1) else most_common[1][0]
         new_card = sorted_card.replace("J", non_j_most_common)
-        new_count = Counter(new_card)
-        most_common = new_count.most_common(5)
-        hand_rank = 0
-        if most_common[0][1] == 5:
-            hand_rank = 6
-        elif most_common[0][1] == 4:
-            hand_rank = 5
-        elif most_common[0][1] == 3:
-            if most_common[1][1] == 2:
-                hand_rank = 4
-            else:
-                hand_rank = 3
-        elif most_common[0][1] == 2:
-            if most_common[0][1] == most_common[1][1]:
-                hand_rank = 2
-            else:
-                hand_rank = 1
-        hand_list[hand_rank].append((card, int(bid)))
+
+        new_most_common = Counter(new_card).most_common(5)
+        pattern = "".join(list(map(lambda x: str(x[1]), new_most_common)))
+        hand_list[rank_map[pattern]].append((card, int(bid)))
     rank = 1
-    # print(hand_list)
     for hands in hand_list:
         temp = sorted(hands, key=lambda x: [SORT_ORDER[char] for char in x[0]])
         for hand in temp:
@@ -48,39 +34,21 @@ def d7_2(input):
 def d7_1(input):
     ans = 0
     hand_list = [[] for _ in range(7)]
+    SORT_ORDER = {"2": 0, "3": 1, "4": 2, "5": 3, "6": 4, "7": 5, "8": 6, "9": 7, "T": 8, "J": 9, "Q": 10, "K": 11, "A": 12}
+    rank_map = {"5": 6, "41": 5, "32": 4, "311": 3, "221": 2, "2111": 1, "11111": 0}
 
     for line in input:
         card, bid = line.split(" ")
-        count = Counter(card)
-        most_common = count.most_common(5)
-        hand_rank = 0
-        if most_common[0][1] == 5:
-            hand_rank = 6
-        elif most_common[0][1] == 4:
-            hand_rank = 5
-        elif most_common[0][1] == 3:
-            if most_common[1][1] == 2:
-                hand_rank = 4
-            else:
-                hand_rank = 3
-        elif most_common[0][1] == 2:
-            if most_common[0][1] == most_common[1][1]:
-                hand_rank = 2
-            else:
-                hand_rank = 1
-        hand_list[hand_rank].append((card, int(bid)))
+        most_common = Counter(card).most_common(5)
+        pattern = "".join(list(map(lambda x: str(x[1]), most_common)))
+        hand_list[rank_map[pattern]].append((card, int(bid)))
     rank = 1
-    SORT_ORDER = {"2": 0, "3": 1, "4": 2, "5": 3, "6": 4, "7": 5, "8": 6, "9": 7, "T": 8, "J": 9, "Q": 10, "K": 11, "A": 12}
-    # print(hand_list)
     for hands in hand_list:
-        # print()
         temp = sorted(hands, key=lambda x: [SORT_ORDER[char] for char in x[0]])
-        # print(temp)
         for hand in temp:
             ans += rank*hand[1]
             rank += 1
     print(ans)
-
 def d6_2(input):
     ans = 1
     t = int("".join(re.findall("\d+", input[0])))
