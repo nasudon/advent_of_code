@@ -4,6 +4,48 @@ import sys, re, statistics, heapq
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
 
+def d8_2(input):
+    ans = 0
+    inst = list(input[0])
+    inst_map = {"L": 0, "R": 1}
+    node_map = {}
+    end_with_A = []
+    for i in range(2, len(input)):
+        src, dist = input[i].split(" = ")
+        dists = dist[1:-1].split(", ")
+        node_map[src] = dists
+        if src[-1] == "A":
+            end_with_A.append(src)
+    current_list = list(map(lambda x: node_map[x], end_with_A))
+    counts = []
+    for i in range(len(current_list)):
+        next = "000"
+        current = current_list[i]
+        count = 0
+        while next[-1] != "Z":
+            next = current[inst_map[inst[count%len(inst)]]]
+            count += 1
+            current = node_map[next]
+        counts.append(count)
+    ans = math.lcm(*counts)
+    print(ans)
+
+def d8_1(input):
+    ans = 0
+    inst = list(input[0])
+    inst_map = {"L": 0, "R": 1}
+    node_map = {}
+    for i in range(2, len(input)):
+        src, dist = input[i].split(" = ")
+        dists = dist[1:-1].split(", ")
+        node_map[src] = dists
+    current = node_map["AAA"]
+    next = ""
+    while next != "ZZZ":
+        next = current[inst_map[inst[ans%len(inst)]]]
+        ans += 1
+        current = node_map[next]
+    print(ans)
 
 def d7_2(input):
     ans = 0
@@ -49,6 +91,7 @@ def d7_1(input):
             ans += rank*hand[1]
             rank += 1
     print(ans)
+
 def d6_2(input):
     ans = 1
     t = int("".join(re.findall("\d+", input[0])))
