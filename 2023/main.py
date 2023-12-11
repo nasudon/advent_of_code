@@ -1,8 +1,149 @@
 # main.py
 
-import sys, re, statistics, heapq, math
+import sys, re, statistics, heapq, math, time
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
+
+
+def d10_2(input):
+    ans = 0
+    N, E, S, W = (-1, 0), (0, 1), (1, 0), (0, -1)
+    
+    possible_directions = {
+        "-": [W, E], 
+        "7": [S, W],
+        "F": [E, S], 
+        "L": [N, E], 
+        "J": [W, N], 
+        "|": [N, S],
+        "S": [N, E, S, W]
+    }
+    possible_pipe = {
+        N: ["|", "7", "F", "S"],
+        E: ["-", "7", "J", "S"],
+        S: ["|", "J", "L", "S"],
+        W: ["-", "F", "L", "S"]
+    }
+    clone_map = [["." for _ in range(len(row))] for row in input]
+    def find_path(x, y, path):
+        while len(path) == 0 or (x, y) != path[0]:
+            clone_map[x][y] = input[x][y]
+            path.append((x, y))
+            next_directions = possible_directions[input[x][y]]
+            for dx, dy in next_directions:
+                if (len(path) > 1 and (x+dx, y+dy) == path[-2]) or x+dx >= len(input) or x+dx < 0 or y+dy >= len(input[0]) or y+dy < 0 or input[x+dx][y+dy] == ".":
+                    continue
+                acceptable_move = possible_pipe[(dx, dy)]
+                if input[x+dx][y+dy] in acceptable_move:
+                    x = x+dx
+                    y = y+dy
+                    break
+        return path
+    found = False
+    path = []
+    for x in range(len(input)):
+        col = list(input[x])
+        for y in range(len(col)):
+            if input[x][y] == "S":
+                path = find_path(x, y, [])
+                prev_dir, next_dir = (path[-1][0]-x, path[-1][1]-y), (path[1][0]-x, path[1][1]-y)
+                origanal_s_pipe = next((k for k, v in possible_directions.items() if set(v) == set([prev_dir, next_dir])), None)
+                clone_map[x][y] = origanal_s_pipe
+                found = True
+                break
+        if found:
+            break
+    for x in range(len(input)):
+        col = list(input[x])
+        start_count = False
+        for y in range(len(col)):
+            if clone_map[x][y] in (list("LJ|")):
+                start_count = not start_count
+            elif clone_map[x][y] == "." and start_count:
+                clone_map[x][y] = "O"
+                ans += 1
+    # print("\n".join("".join(row) for row in clone_map))
+    print(ans)
+
+def d10_1(input):
+    ans = 0
+    N, E, S, W = (-1, 0), (0, 1), (1, 0), (0, -1)
+    
+    possible_directions = {
+        "-": [W, E], 
+        "7": [S, W],
+        "F": [E, S], 
+        "L": [N, E], 
+        "J": [W, N], 
+        "|": [N, S],
+        "S": [N, E, S, W]
+    }
+    possible_pipe = {
+        N: ["|", "7", "F", "S"],
+        E: ["-", "7", "J", "S"],
+        S: ["|", "J", "L", "S"],
+        W: ["-", "F", "L", "S"]
+    }
+    def find_path(x, y, path):
+        while len(path) == 0 or (x, y) != path[0]:
+            path.append((x, y))
+            next_directions = possible_directions[input[x][y]]
+            for dx, dy in next_directions:
+                if (len(path) > 1 and (x+dx, y+dy) == path[-2]) or x+dx >= len(input) or x+dx < 0 or y+dy >= len(input[0]) or y+dy < 0 or input[x+dx][y+dy] == ".":
+                    continue
+                acceptable_move = possible_pipe[(dx, dy)]
+                if input[x+dx][y+dy] in acceptable_move:
+                    x = x+dx
+                    y = y+dy
+                    break
+        return path
+    found = False
+    path = []
+    for x in range(len(input)):
+        col = list(input[x])
+        for y in range(len(col)):
+            if input[x][y] == "S":
+                path = find_path(x, y, [])
+                found = True
+                break
+        if found:
+            break
+    ans = len(path) / 2
+    print(ans)
+
+def d9_2(input):
+    ans = 0
+    for line in input:
+        record_list = deque([deque(map(int, line.split(" ")))])
+        # print(record_list[-1])
+        while "".join(map(str, record_list[-1])) != "0"*len(record_list[-1]):
+            temp = deque()
+            for i in range(1, len(record_list[-1])):
+                temp.append(record_list[-1][i]- record_list[-1][i-1])
+            record_list.append(temp)
+        record_list[-1].append(0)
+        for i in range(len(record_list)-1-1, -1, -1):
+            # print(record_list[i+1][-1])
+            record_list[i].appendleft(record_list[i][0] - record_list[i+1][0])
+        ans += record_list[0][0]
+        print(record_list)
+    print(ans)
+
+def d9_1(input):
+    ans = 0
+    for line in input:
+        record_list = [list(map(int, line.split(" ")))]
+        while "".join(map(str, record_list[-1])) != "0"*len(record_list[-1]):
+            temp = []
+            for i in range(1, len(record_list[-1])):
+                temp.append(record_list[-1][i]- record_list[-1][i-1])
+            record_list.append(temp)
+        record_list[-1].append(0)
+        for i in range(len(record_list)-1-1, -1, -1):
+            # print(record_list[i+1][-1])
+            record_list[i].append(record_list[i][-1] + record_list[i+1][-1])
+        ans += record_list[0][-1]
+    print(ans)
 
 def d8_2(input):
     ans = 0
@@ -56,7 +197,7 @@ def d7_2(input):
 
     for line in input:
         card, bid = line.split(" ")
-        
+
         sorted_card = "".join(sorted(card, key=lambda x: SORT_ORDER[x], reverse=True))
         most_common = Counter(sorted_card).most_common(5)
         non_j_most_common = most_common[0][0] if (most_common[0][0] != "J" or len(most_common) == 1) else most_common[1][0]
@@ -163,7 +304,7 @@ def d5_2(input):
     for j in range(len(mapping[stage-1])):
         if mapping[stage-1][j][2] is False:
             mapping[stage].append(mapping[stage-1][j])
-    print(min(mapping[len(mapping)-1], key=lambda x: x[0]))
+    print(min(mapping[len(mapping)-1], key=lambda x: x[0])[0])
 
 def d5_1(input):
     mapping = [list(map(int, input[0].split(": ")[1].split(" ")))]
@@ -365,9 +506,11 @@ if __name__ == "__main__":
         try:
             with open(file_name, 'r') as file:
                 lines = list(map(str.strip, file.readlines()))
-
+                
+                start_time = time.time()
                 # Run the function
                 function_to_run(lines)
+                print("--- %s ms ---" % ((time.time() - start_time)*1000))
         except FileNotFoundError:
             print(f"File {file_name} not found.")
 
