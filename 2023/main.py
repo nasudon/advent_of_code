@@ -4,6 +4,73 @@ import sys, re, statistics, heapq, math, time
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
 
+def d11_2(input):
+    ans = 0
+
+    x_dist = [1 for _ in input]
+    y_dist = [1 for _ in input[0]]
+    galaxies_list = []
+    all_empty = "."*len(input[0])
+    for i in range(len(input)):
+        if input[i] == all_empty:
+            x_dist[i] *= 1000000
+    for j in range(len(input[0])):
+        has_galaxies = False
+        for i in range(len(input)):
+            if input[i][j] != ".":
+                has_galaxies = True
+                galaxies_list.append((i,j))
+                # break
+        if has_galaxies:
+            continue
+        y_dist[j] *= 1000000
+
+    # print("\n".join("".join(map(str,row)) for row in clone_map))
+    comb = list(combinations(galaxies_list, 2))
+    for galaxy1, galaxy2 in comb:
+        x1, y1 = galaxy1
+        x2, y2 = galaxy2
+        dist = 0
+        for dx in range(x1, x2, 1 if x1 < x2 else -1):
+            dist += x_dist[dx]
+        for dy in range(y1, y2, 1 if y1 < y2 else -1):
+            dist += y_dist[dy]
+        ans += dist
+    print(ans)
+
+def d11_1(input):
+    ans = 0
+
+    x_dist = [1 for _ in input]
+    y_dist = [1 for _ in input[0]]
+    galaxies_list = []
+    all_empty = "."*len(input[0])
+    for i in range(len(input)):
+        if input[i] == all_empty:
+            x_dist[i] *= 2
+    for j in range(len(input[0])):
+        has_galaxies = False
+        for i in range(len(input)):
+            if input[i][j] != ".":
+                has_galaxies = True
+                galaxies_list.append((i,j))
+                # break
+        if has_galaxies:
+            continue
+        y_dist[j] *= 2
+
+    # print("\n".join("".join(map(str,row)) for row in clone_map))
+    comb = list(combinations(galaxies_list, 2))
+    for galaxy1, galaxy2 in comb:
+        x1, y1 = galaxy1
+        x2, y2 = galaxy2
+        dist = 0
+        for dx in range(x1, x2, 1 if x1 < x2 else -1):
+            dist += x_dist[dx]
+        for dy in range(y1, y2, 1 if y1 < y2 else -1):
+            dist += y_dist[dy]
+        ans += dist
+    print(ans)
 
 def d10_2(input):
     ans = 0
