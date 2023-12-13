@@ -4,6 +4,165 @@ import sys, re, statistics, heapq, math, time
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
 
+def d13_2(input):
+    ans = 0
+    all_maps = []
+    temp_map = []
+    for line in input:
+        if len(line) == 0:
+            all_maps.append(temp_map)
+            temp_map = []
+        else:
+            temp_map.append(line)
+    all_maps.append(temp_map)
+    
+    def check_smudge(map):
+        for i in range(len(map)-1):
+            curr = i
+            j = i+1
+            reflect = True
+            has_smudge = False
+            start = i if i < len(map)//2 else j
+            end = -1 if  i < len(map)//2 else len(map)
+            step = -1 if i < len(map)//2 else 1
+            for _ in range(start, end, step):
+                if map[i] != map[j]:
+                    if has_smudge:
+                        reflect = False
+                        break
+                    else:
+                        has_smudge = True
+                        cnt = 0
+                        for x in range(len(map[i])):
+                            if map[i][x] != map[j][x]:
+                                cnt += 1
+                                if cnt > 1:
+                                    break
+                        if cnt > 1:
+                            reflect = False
+                            break
+                i -= 1
+                j += 1
+            if reflect and has_smudge:
+                return curr+1
+        return 0
+
+    for map in all_maps:
+        ans += check_smudge(list(zip(*map)))
+        ans += check_smudge(map)*100
+                    
+    print(ans)
+
+def d13_1(input):
+    ans = 0
+    all_maps = []
+    temp_map = []
+    for line in input:
+        if len(line) == 0:
+            all_maps.append(temp_map)
+            temp_map = []
+        else:
+            temp_map.append(line)
+    all_maps.append(temp_map)
+    
+    def check(map):
+        for i in range(len(map)-1):
+            curr = i
+            j = i+1
+            reflect = True
+            start = i if i < len(map)//2 else j
+            end = -1 if  i < len(map)//2 else len(map)
+            step = -1 if i < len(map)//2 else 1
+            for _ in range(start, end, step):
+                if map[i] != map[j]:
+                    reflect = False
+                    break
+                i -= 1
+                j += 1
+            if reflect:
+                return curr+1
+        return 0
+
+    for map in all_maps:
+        ans += check(list(zip(*map)))
+        ans += check(map)*100
+                    
+    print(ans)
+
+def d12_2(input):
+    ans = 0
+    memo = {}
+    def dfs(patterns, numbers, index, broken_num, broken_size):
+        if (index, broken_num, broken_size) in memo:
+            return memo[(index, broken_num, broken_size)]
+        if index == len(patterns):
+            if ((broken_num == len(numbers) and broken_size == 0) or 
+                    (broken_num == len(numbers)-1 and numbers[broken_num] == broken_size)):
+                return 1
+            return 0
+        count = 0
+        if (broken_num > len(numbers) or 
+                (broken_num < len(numbers) and numbers[broken_num] < broken_size)):
+            memo[(index, broken_num, broken_size)] = 0
+            return 0
+        
+        if patterns[index] == "?" or patterns[index] == "#":
+            count += dfs(patterns, numbers, index+1, broken_num, broken_size+1)
+        if patterns[index] == "?" or patterns[index] == ".":
+            if broken_size == 0:
+                count += dfs(patterns, numbers, index+1, broken_num, 0)
+            elif broken_num < len(numbers) and numbers[broken_num] == broken_size:
+                count += dfs(patterns, numbers, index+1, broken_num+1, 0)
+        memo[(index, broken_num, broken_size)] = count
+        return count
+            
+    for line in input:
+        memo = {}
+        pattern_list, number_list = line.split(" ")
+        patterns = []
+        numbers = []
+        for _ in range(5):
+            patterns.extend(pattern_list)
+            patterns.append("?")
+            numbers.extend(map(int, number_list.split(",")))
+        patterns.pop()
+        ans += dfs(patterns, numbers, 0, 0, 0)
+    print(ans)
+
+def d12_1(input):
+    ans = 0
+    memo = {}
+    def dfs(patterns, numbers, index, broken_num, broken_size):
+        if (index, broken_num, broken_size) in memo:
+            return memo[(index, broken_num, broken_size)]
+        if index == len(patterns):
+            if ((broken_num == len(numbers) and broken_size == 0) or 
+                    (broken_num == len(numbers)-1 and numbers[broken_num] == broken_size)):
+                return 1
+            return 0
+        count = 0
+        if (broken_num > len(numbers) or 
+                (broken_num < len(numbers) and numbers[broken_num] < broken_size)):
+            memo[(index, broken_num, broken_size)] = 0
+            return 0
+        
+        if patterns[index] == "?" or patterns[index] == "#":
+            count += dfs(patterns, numbers, index+1, broken_num, broken_size+1)
+        if patterns[index] == "?" or patterns[index] == ".":
+            if broken_size == 0:
+                count += dfs(patterns, numbers, index+1, broken_num, 0)
+            elif broken_num < len(numbers) and numbers[broken_num] == broken_size:
+                count += dfs(patterns, numbers, index+1, broken_num+1, 0)
+        memo[(index, broken_num, broken_size)] = count
+        return count
+
+    for line in input:
+        memo = {}
+        patterns, number_list = line.split(" ")
+        numbers = list(map(int, number_list.split(",")))
+        ans += dfs(patterns, numbers, 0, 0, 0)
+    print(ans)
+
 def d11_2(input):
     ans = 0
 
@@ -304,11 +463,25 @@ def d6_2(input):
     ans = 1
     t = int("".join(re.findall("\d+", input[0])))
     d = int("".join(re.findall("\d+", input[1])))
-    for i in range(t):
-        if (i * (t-i)) > d:
-            can_win = i
-            break
-    mark = (int(t/2) - can_win + 1)*2
+    def binary_search(x, d):
+        left, right = 0, x
+        while left < right:
+            mid = (left + right) // 2
+            result = mid * (x - mid)
+            
+            if result == d:
+                return mid
+            elif result < d:
+                left = mid + 1
+            else:
+                right = mid
+        return left
+    can_win = binary_search(t, d)
+    # for i in range(t):
+    #     if (i * (t-i)) > d:
+    #         can_win = i
+    #         break
+    mark = (t//2 - can_win + 1)*2
     if t%2 == 0:
         mark -= 1
     ans *= mark
