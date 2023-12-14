@@ -4,6 +4,65 @@ import sys, re, statistics, heapq, math, time
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
 
+def d14_2(input):
+    ans = 0
+    map = []
+    for line in input:
+        map.append(list(line))
+    N = (-1,  0,          0, len(map),  1,           0, len(map[0]), 1)
+    W = ( 0, -1,          0, len(map),  1,           0, len(map[0]), 1)
+    S = ( 1,  0, len(map)-1,       -1, -1, len(map[0])-1,          -1, -1)
+    E = ( 0,  1, len(map)-1,       -1, -1, len(map[0])-1,          -1, -1)
+    patterns = {}
+    times = 0
+    while times < 1000000000:
+        pattern = tuple(i for i, c in enumerate("".join("".join(row) for row in map)) if c == "O")
+        if times != 0 and pattern in patterns:
+            hitting = patterns[pattern]
+            # print("hit ", hitting, times)
+            times = hitting + ((times - hitting) * ((1000000000-hitting)//(times - hitting)))
+        else:
+            # print(pattern)
+            patterns[pattern] = times
+        for di, dj, i_start, i_end, i_step, j_start, j_end, j_step in [N, W, S, E]:
+            for i in range(i_start, i_end, i_step):
+                for j in range(j_start, j_end, j_step):
+                    if map[i][j] == "O":
+                        map[i][j] = "."
+                        ni, nj = i, j
+                        while ni >= 0 and nj >= 0 and ni < len(map) and nj < len(map[0]) and map[ni][nj] != "#" and map[ni][nj] != "O":
+                            ni, nj = ni+di, nj+dj
+                        map[ni-di][nj-dj] = "O"
+        times += 1
+        
+    for i in range(len(map)):
+        for j in range(len(map[i])):
+            if map[i][j] == "O":
+                ans += len(map)-i
+
+    # print("\n".join("".join(row) for row in map))
+    print(ans)
+
+def d14_1(input):
+    ans = 0
+    map = []
+    for line in input:
+        map.append(list(line))
+    vmap = list(zip(*map))
+    for row in vmap:
+        row_str = "".join(row)
+        cube_stones = []
+        for pos in re.finditer("#", row_str):
+            cube_stones.append(pos.start())
+        round_stones = row_str.split("#")
+        for i in range(len(round_stones)):
+            count = round_stones[i].count("O")
+            if count > 0:
+                cube = cube_stones[i-1]+1 if i > 0 else 0
+                score = ((len(vmap) - cube ) * count) - (count*(count-1))/2
+                ans += score
+    print(ans)
+
 def d13_2(input):
     ans = 0
     all_maps = []
