@@ -4,6 +4,41 @@ import sys, re, statistics, heapq, math, time
 from collections import defaultdict, Counter, deque
 from itertools import permutations, product, combinations
 
+
+def d15_2(input):
+    ans = 0
+    input = input[0].split(",")
+    boxes = [{} for _ in range(256)]
+    for value in input:
+        count = 0
+        end = -1 if value[-1] == "-" else -2
+        for i in range(len(value) + end):
+            count += ord(value[i])
+            count *= 17
+            count %= 256
+        if value[end] == "=":
+            boxes[count][value[:end]] = value[-1]
+        elif value[:end] in boxes[count]:
+            del boxes[count][value[:end]]
+    for i in range(len(boxes)):
+        j = 1
+        for v in boxes[i].values():
+            ans += (i+1)*j*int(v)
+            j += 1
+    print(ans)
+
+def d15_1(input):
+    ans = 0
+    input = input[0].split(",")
+    for value in input:
+        count = 0
+        for char in value:
+            count += ord(char)
+            count *= 17
+            count %= 256
+        ans += count
+    print(ans)
+
 def d14_2(input):
     ans = 0
     map = []
